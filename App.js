@@ -6,29 +6,19 @@
  * @flow strict-local
  */
 
-import React, {useEffect, useState} from 'react';
-
+import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import 'react-native-gesture-handler';
-
 import Home from './src/Home';
 import Result from './src/Result';
 import Test from './src/Test';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Alert} from 'react-native';
+import {Alert, BackHandler} from 'react-native';
 
 const Drawer = createDrawerNavigator();
 
 const App = () => {
-    const storeData = async (value) => {
-        try {
-            await AsyncStorage.setItem('@storage_Key', value)
-        } catch (e) {
-            // saving error
-        }
-    }
 
     const clearAll = async () => {
         try {
@@ -38,10 +28,17 @@ const App = () => {
         }
     }
 
-
-    const getData = async () => {
+    const storeData = async (key, value) => {
         try {
-            const value = await AsyncStorage.getItem('@storage_Key')
+            await AsyncStorage.setItem(key, value)
+        } catch (e) {
+            // saving error
+        }
+    }
+
+    const getData = async (key) => {
+        try {
+            const value = await AsyncStorage.getItem(key)
 
             if(value !== null) {
                 return value
@@ -55,27 +52,27 @@ const App = () => {
     }
 
     const firstRun = async () => {
-        let value = await getData('@storage_Key')
+        //let clear = await clearAll()
+        let value = await getData('@first_run_key')
 
         if(value === null){
-            let result = await storeData("true")
             Alert.alert(
                 'Regulamin',
                 'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin',
                 [
-                    {text: 'OK', onPress: () => {}},
+                    {text: 'Zaakceptuj', onPress: async () => {
+                            let result = await storeData('@first_run_key', "true")
+                        }},
+                    {text: 'Anuluj', onPress: () => {BackHandler.exitApp();}, style: 'cancel'},
                 ],
                 { cancelable: false }
             )
-
         }
     };
 
     useEffect(() => {
-        let firstRunResult = firstRun()
+        let o = firstRun()
     }, []);
-
-
 
     return (
       <NavigationContainer>

@@ -5,8 +5,6 @@ import { black, lightBlue100, white } from 'react-native-paper/lib/typescript/st
 
 const Home = ({ navigation }) => {
 
-
-
     let ops = []
   for(let i = 0;i < 10;i++){
      ops.push(<TouchableOpacity key={"element_"+i} style={styles.testBTN} onPress={() => Linking.openURL()}>
@@ -41,7 +39,6 @@ const Home = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
         </ScrollView>
-
     )
 }
 const styles = StyleSheet.create({
