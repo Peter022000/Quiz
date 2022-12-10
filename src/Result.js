@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity,StyleSheet } from 'react-native'
 import { Table, Row, Rows } from 'react-native-table-component';
 
 export default class Result extends Component {
@@ -19,15 +19,38 @@ export default class Result extends Component {
     render() {
         const state = this.state;
         return (
-            <View style={{flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff'}}>
-                <Table borderStyle={{borderWidth: 2, borderColor: '#c8e1ff'}}>
-                    <Row data={state.tableHead} style={{height: 40, backgroundColor: '#f1f8ff'}} textStyle={{margin: 6}}/>
-                    <Rows data={state.tableData} textStyle={{margin: 6}}/>
+            <View style={styles.blues}>
+                <Table borderStyle={{borderWidth: 2}}>
+                    <Row data={state.tableHead} style={{height: 40}} textStyle={styles.titles}/>
+                    <Rows data={state.tableData} textStyle={styles.NRtext} />
                 </Table>
             </View>
         )
     }
+
 }
+//style={{flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff'}}>
+const styles = StyleSheet.create({
+    container:{
+     flex:1
+    },
+    blues: {
+        color: 'lightblue',
+        elevation: 20,
+        marginTop:20,
+        padding: 10
+    },
+    titles:{
+        fontWeight: 'bold',
+        fontSize:20,
+        margin: 6,
+    },
+    NRtext:{
+        fontSize:15,
+        margin: 6,
+    },
+
+   });
 
 
 // const Result = ({ navigation }) => {
