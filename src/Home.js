@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, TouchableOpacity,StyleSheet, Linking, ScrollView, Button} from 'react-native';
+import {View, Text, TouchableOpacity,StyleSheet, ScrollView} from 'react-native';
 
 const Home = (props) => {
 
