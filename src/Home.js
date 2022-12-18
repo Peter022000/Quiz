@@ -1,8 +1,5 @@
-import React, {useEffect, useState} from 'react';
+import React, from 'react';
 import {View, Text, TouchableOpacity,StyleSheet, Linking, ScrollView, Button} from 'react-native';
-import { shadow } from 'react-native-paper';
-import { black, lightBlue100, white } from 'react-native-paper/lib/typescript/styles/colors';
-import Test from './Test';
 
 const Home = (props) => {
 
@@ -84,8 +81,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         marginTop: 15,
     },
-
     FooterBC:{ padding: 10, borderWidth: 1, alignItems: 'center'},
-
    });
+
 export default Home

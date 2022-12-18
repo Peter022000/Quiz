@@ -1,12 +1,9 @@
-import React, {Component, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     View,
     Text,
-    TouchableOpacity,
-    StyleSheet,
     FlatList,
     RefreshControl,
-    ToastAndroid,
     ActivityIndicator,
 } from 'react-native';
 
@@ -65,7 +62,6 @@ const Result = (props) => {
     )
 
     return (
-        // <View style={styles.blues}>
         <View style={{margin: 15}}>
             {refreshing ? <ActivityIndicator /> : null}
             {isLoading ? <ActivityIndicator/> : (

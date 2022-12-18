@@ -1,13 +1,13 @@
 import {
     ActivityIndicator,
-    Alert, BackHandler,
+    Alert,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 
 const Finish = (props) => {
 
@@ -19,19 +19,19 @@ const Finish = (props) => {
         {
             try {
                 setRefreshing(true);
-                // await fetch('http://tgryl.pl/quiz/result', {
-                //     method: 'POST',
-                //     headers: {
-                //         Accept: 'application/json',
-                //         'Content-Type': 'application/json',
-                //     },
-                //     body: JSON.stringify({
-                //         nick: name,
-                //         score: props.route.params.score,
-                //         total: props.route.params.total,
-                //         type: props.route.params.nameQuiz
-                //     }),
-                // });
+                await fetch('http://tgryl.pl/quiz/result', {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nick: name,
+                        score: props.route.params.score,
+                        total: props.route.params.total,
+                        type: props.route.params.nameQuiz
+                    }),
+                });
             } catch (error) {
                 console.error(error);
             } finally {
