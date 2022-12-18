@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import 'react-native-gesture-handler';
@@ -14,15 +14,45 @@ import Home from './src/Home';
 import Result from './src/Result';
 import Test from './src/Test';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Alert, BackHandler} from 'react-native';
+import {ActivityIndicator, Alert, BackHandler} from 'react-native';
+import SplashScreen from 'react-native-splash-screen';
+import Finish from './src/Finish';
 
 const Drawer = createDrawerNavigator();
 
+const timer = () => {
+    return new Promise(res => setTimeout(res, 1000));
+};
+
+function Hidden() {
+    return null;
+}
+
 const App = () => {
+
+    const [quizList, setQuizList] = useState([]);
+    const [isLoading, setLoading] = useState(true);
+
+
+    const regulamin = 'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
+        'RegulaminRegulaminRegulaminRegulaminRegulamin';
 
     const clearAll = async () => {
         try {
-            await AsyncStorage.clear()
+            await AsyncStorage.clear();
         } catch(e) {
             // clear error
         }
@@ -30,7 +60,7 @@ const App = () => {
 
     const storeData = async (key, value) => {
         try {
-            await AsyncStorage.setItem(key, value)
+            await AsyncStorage.setItem(key, value);
         } catch (e) {
             // saving error
         }
@@ -38,13 +68,13 @@ const App = () => {
 
     const getData = async (key) => {
         try {
-            const value = await AsyncStorage.getItem(key)
+            const value = await AsyncStorage.getItem(key);
 
             if(value !== null) {
-                return value
+                return value;
             }
             else {
-                return null
+                return null;
             }
         } catch(e) {
             // error reading value
@@ -53,12 +83,12 @@ const App = () => {
 
     const firstRun = async () => {
         //let clear = await clearAll()
-        let value = await getData('@first_run_key')
+        let value = await getData('@first_run_key');
 
         if(value === null){
             Alert.alert(
                 'Regulamin',
-                'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin',
+                regulamin,
                 [
                     {text: 'Zaakceptuj', onPress: async () => {
                             let result = await storeData('@first_run_key', "true")
@@ -66,24 +96,46 @@ const App = () => {
                     {text: 'Anuluj', onPress: () => {BackHandler.exitApp();}, style: 'cancel'},
                 ],
                 { cancelable: false }
-            )
+            );
         }
     };
 
+    const getQuizList = async () => {
+        try {
+            const response = await fetch('https://tgryl.pl/quiz/tests');
+            const json = await response.json();
+            setQuizList(json);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     useEffect(() => {
-        let o = firstRun()
+        let o = firstRun();
+        let o2 = getQuizList();
     }, []);
+
+    timer().then(() => {
+        SplashScreen.hide();
+    });
 
     return (
       <NavigationContainer>
+          {isLoading ? <ActivityIndicator/> : (
           <Drawer.Navigator initialRouteName="Home">
-              <Drawer.Screen name="Home page" component={Home} />
+              <Drawer.Screen name="Home page" component={Home} initialParams={{quizList: quizList}}/>
               <Drawer.Screen name="Result" component={Result} />
-              <Drawer.Screen name="Title test #1" component={Test} />
-              <Drawer.Screen name="Title test #2" component={Test} />
-              <Drawer.Screen name="Title test #3" component={Test} />
-              <Drawer.Screen name="Title test #4" component={Test} />
+              {quizList.map((quiz, index) => {
+                  return (
+                      <Drawer.Screen key={index+".drawer_quiz_"+quiz.id} name={quiz.name} component={Test}  initialParams={{quizId: quiz.id}}/>
+                  );
+              })
+              }
+              <Drawer.Screen name="Finish" component={Finish} />
           </Drawer.Navigator>
+          )}
       </NavigationContainer>
   );
 };

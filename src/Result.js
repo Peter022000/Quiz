@@ -1,62 +1,51 @@
-import React, {Component} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, FlatList, RefreshControl, ToastAndroid} from 'react-native';
-import { Table, Row, Rows } from 'react-native-table-component';
+import React, {Component, useEffect, useState} from 'react';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+    FlatList,
+    RefreshControl,
+    ToastAndroid,
+    ActivityIndicator,
+} from 'react-native';
 
-const Result = ({ navigation }) => {
-    const [refreshing, setRefreshing] = React.useState(false);
-    const [listData, setListData] = React.useState(results);
+const Result = (props) => {
+    const [refreshing, setRefreshing] = useState(false);
+    const [isLoading, setLoading] = useState(true);
+    const [results, setResults] = useState([]);
+
 
     const onRefresh = React.useCallback(async () => {
-        // setRefreshing(true);
-        // if (listData.length < 10) {
-        //     try {
-        //         let response = await fetch(
-        //             'http://www.mocky.io/v2/5e3315753200008abe94d3d8?mocky-delay=2000ms',
-        //         );
-        //         let responseJson = await response.json();
-        //         console.log(responseJson);
-        //         setListData(responseJson.result.concat(results));
-        //         setRefreshing(false)
-        //     } catch (error) {
-        //         console.error(error);
-        //     }
-        // }
-        // else{
-        //     ToastAndroid.show('No more new data available', ToastAndroid.SHORT);
-        //     setRefreshing(false)
-        // }
+        setRefreshing(true);
+        try {
+            let response = await fetch(
+                'https://tgryl.pl/quiz/results?last=10',
+            );
+            let responseJson = await response.json();
+            setResults(responseJson);
+            setRefreshing(false);
+        } catch (error) {
+            console.error(error);
+        }
+
     }, [refreshing]);
 
-    const results = [
-        {
-            "nick": "Marek",
-            "score": 18,
-            "total": 20,
-            "type": "historia",
-            "date": "2022-11-22"
-        },
-        {
-            "nick": "Paweł",
-            "score": 7,
-            "total": 20,
-            "type": "Geografia",
-            "date": "2022-11-11"
-        },
-        {
-            "nick": "Andrzej",
-            "score": 17,
-            "total": 20,
-            "type": "Historia",
-            "date": "2022-11-12"
-        },
-        {
-            "nick": "Adam",
-            "score": 18,
-            "total": 20,
-            "type": 'Przyroda',
-            "date": "2022-11-16"
-        },
-        ]
+    const getResults = async () => {
+        try {
+            const response = await fetch('https://tgryl.pl/quiz/results?last=10');
+            const json = await response.json();
+            setResults(json);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        let a = getResults();
+    }, []);
 
     const item = ({ item }) => (
         <View style={{ flexDirection: 'row' }}>
@@ -70,7 +59,7 @@ const Result = ({ navigation }) => {
                 <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>{item.type}</Text>
             </View>
             <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
-                <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>{item.date}</Text>
+                <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>{item.createdOn}</Text>
             </View>
         </View>
     )
@@ -78,30 +67,37 @@ const Result = ({ navigation }) => {
     return (
         // <View style={styles.blues}>
         <View style={{margin: 15}}>
-            <View style={{ flexDirection: 'row' }}>
-                <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
-                    <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center'}}>Nick</Text>
+            {refreshing ? <ActivityIndicator /> : null}
+            {isLoading ? <ActivityIndicator/> : (
+             <View>
+                <View style={{ flexDirection: 'row' }}>
+                    <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center'}}>Nick</Text>
+                    </View>
+                    <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>Point</Text>
+                    </View>
+                    <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>Type</Text>
+                    </View>
+                    <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>Date</Text>
+                    </View>
                 </View>
-                <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
-                    <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>Point</Text>
-                </View>
-                <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
-                    <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>Type</Text>
-                </View>
-                <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
-                    <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>Date</Text>
-                </View>
-            </View>
-            <FlatList
-                data={results}
-                renderItem={item}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                    />
-                }
-                keyExtractor={item => item.nick.toString()} />
+                <FlatList
+                    style={{marginBottom: 15}}
+                    data={results}
+                    renderItem={item}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
+                    //keyExtractor={item => item.nick.toString()}
+                />
+             </View>
+            )}
         </View>
     )
 }
