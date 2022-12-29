@@ -128,7 +128,7 @@ const App = () => {
 
     const randQuiz = () =>{
         let min = 0;
-        let max = quizList.length-1;
+        let max = quizList.length;
         let random = Math.floor(Math.random() * (max - min) + min);
 
         return quizList[random].id;
