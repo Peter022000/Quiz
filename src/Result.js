@@ -12,7 +12,6 @@ const Result = (props) => {
     const [isLoading, setLoading] = useState(true);
     const [results, setResults] = useState([]);
 
-
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);
         try {

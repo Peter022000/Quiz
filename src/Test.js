@@ -3,12 +3,10 @@ import {ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity
 import {ProgressBar} from 'react-native-paper';
 import {CountdownCircleTimer} from 'react-native-countdown-circle-timer';
 
-
 const Test = (props) => {
 
     const [points, setPoints] = useState(0);
     const [currentIndex, setIndex] = useState(-1);
-    const [isComplete, setIsComplete] = useState(false);
     const [isPlaying, setIsPlaying] = useState(true);
     const [key, setKey] = useState(0);
     const [answerIndex, setAnswerIndex] = useState();
@@ -18,30 +16,9 @@ const Test = (props) => {
 
     const clear = () => {
         setPoints(0);
-        this.wynik = 0;
         setIndex(0);
         setKey(prevKey => prevKey + 1);
-        setIsComplete(false);
         setIsPlaying(true);
-    }
-
-    const result = () => {
-        setIsComplete(true);
-
-
-        Alert.alert(
-            'wynik',
-            'Twój wynik to ' + points,
-            [
-                {text: 'Wyjdź do menu', onPress: async () => {
-                    props.navigation.navigate('Home page');
-                }},
-                {text: 'Powtórz', onPress: () => {
-                    clear();
-                    }, style: 'cancel'},
-            ],
-            { cancelable: false }
-        );
     }
 
     const getQuiz = async () => {
@@ -56,13 +33,6 @@ const Test = (props) => {
             setLoading(false);
         }
     }
-
-    useEffect(() => {
-        return props.navigation.addListener("focus", () => {
-            clear();
-            let o = getQuiz();
-        });
-    }, [props.navigation]);
 
     const check = () =>{
         setAnswerIndex(-1);
@@ -81,9 +51,16 @@ const Test = (props) => {
         }
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         return props.navigation.addListener("focus", () => {
+            let o = getQuiz();
             clear();
+        });
+    }, [props.navigation]);
+
+    useEffect(() => {
+        return props.navigation.addListener("blur", () => {
+            setIsPlaying(false);
         });
     }, [props.navigation]);
 
@@ -104,10 +81,19 @@ const Test = (props) => {
         }
     }, [points]);
 
-
-    //navigation.reset
-
-    //dekompoment
+    const showAnswers = () => {
+        return(
+            <View style={styles.answers}>
+                {quiz.tasks[currentIndex].answers.map((answer, index) => {
+                    return (
+                        <TouchableOpacity key={quiz.id+'_'+currentIndex+'_'+index} onPress={() => setAnswerIndex(index)} style={styles.btn}>
+                            <Text style={styles.NRtext}>{answer.content}</Text>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
+        )
+    }
 
     return (
         <View style={styles.testCONT}>
@@ -124,14 +110,7 @@ const Test = (props) => {
                             strokeWidth={5}
                             trailStrokeWidth={5}
                             onComplete={() => {
-                                if(isComplete !== true && currentIndex === quiz.tasks.length-1){
-                                    result();
-                                }
-                                else if(isComplete !== true) {
-                                    const index = currentIndex + 1;
-                                    setIndex(index);
-                                    return { shouldRepeat: true }
-                                }
+                                check();
                             }}
                         >
                             {({ remainingTime }) => <Text style={{fontSize: 20}}>{remainingTime}</Text>}
@@ -144,16 +123,7 @@ const Test = (props) => {
                         <View>
                             <Text style={{fontWeight: 'bold', fontSize: 25, textAlign: 'center', margin: 10}}>{quiz.tasks[currentIndex].question}</Text>
                         </View>
-                        <View style={styles.answers}>
-                            {quiz.tasks[currentIndex].answers.map((answer, index) => {
-                                return (
-                                    <TouchableOpacity key={quiz.id+'_'+currentIndex+'_'+index} onPress={() => setAnswerIndex(index)} style={styles.btn}>
-                                        <Text style={styles.NRtext}>{answer.content}</Text>
-                                    </TouchableOpacity>
-                                );
-                            })
-                            }
-                        </View>
+                        {showAnswers()}
                     </ScrollView>
                 </View>
                 )}
@@ -176,7 +146,6 @@ const styles = StyleSheet.create({
     testCONT:{
         display: 'flex',
         flexDirection: 'column' ,
-
     },
     answers:{
         display: 'flex',

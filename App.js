@@ -24,10 +24,6 @@ const timer = () => {
     return new Promise(res => setTimeout(res, 1000));
 };
 
-function Hidden() {
-    return null;
-}
-
 const App = () => {
 
     const [quizList, setQuizList] = useState([]);
@@ -121,19 +117,22 @@ const App = () => {
         SplashScreen.hide();
     });
 
+    const show_drawer_quiz = () =>{
+        return(quizList.map((quiz, index) => {
+            return (
+                <Drawer.Screen key={index+".drawer_quiz_"+quiz.id} name={quiz.name} component={Test}  initialParams={{quizId: quiz.id}}/>
+            );
+        }))
+    }
+
     return (
       <NavigationContainer>
           {isLoading ? <ActivityIndicator/> : (
           <Drawer.Navigator initialRouteName="Home">
               <Drawer.Screen name="Home page" component={Home} initialParams={{quizList: quizList}}/>
               <Drawer.Screen name="Result" component={Result} />
-              {quizList.map((quiz, index) => {
-                  return (
-                      <Drawer.Screen key={index+".drawer_quiz_"+quiz.id} name={quiz.name} component={Test}  initialParams={{quizId: quiz.id}}/>
-                  );
-              })
-              }
-              <Drawer.Screen name="Finish" component={Finish} />
+              {show_drawer_quiz()}
+              <Drawer.Screen name="Finish" options={{drawerItemStyle: {display:'none'}, swipeEnabled: false, headerShown:false}} component={Finish} />
           </Drawer.Navigator>
           )}
       </NavigationContainer>

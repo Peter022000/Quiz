@@ -3,9 +3,8 @@ import {View, Text, TouchableOpacity,StyleSheet, ScrollView} from 'react-native'
 
 const Home = (props) => {
 
-    return (
-        <ScrollView style={{display: 'flex', flexDirection: 'column'}}>
-            {props.route.params.quizList.map((quiz, index) => {
+    const show_home_quiz = () => {
+        return(props.route.params.quizList.map((quiz, index) => {
                 return (
                     <TouchableOpacity key={index+".home_quiz_"+quiz.id} style={styles.testBTN} onPress={() => {props.navigation.navigate(quiz.name)}}>
                         <View>
@@ -29,7 +28,12 @@ const Home = (props) => {
                     </TouchableOpacity>
                 );
             })
-            }
+        )
+    }
+
+    return (
+        <ScrollView style={{display: 'flex', flexDirection: 'column'}}>
+            {show_home_quiz()}
             <View style={styles.FooterBC}>
                 <View>
                     <Text style={styles.FooterTEXT}>Get to know your ranking result</Text>

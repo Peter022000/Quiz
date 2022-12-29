@@ -7,7 +7,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import {useState} from 'react';
+import React, {useState} from 'react';
 
 const Finish = (props) => {
 
@@ -43,7 +43,6 @@ const Finish = (props) => {
                         {text: 'Wyjdź do menu', onPress: async () => {
                                 props.navigation.navigate('Home page')
                             }},
-                        // {text: 'Anuluj', onPress: () => {BackHandler.exitApp();}, style: 'cancel'},
                     ],
                     { cancelable: false }
                 );
@@ -64,8 +63,12 @@ const Finish = (props) => {
                 />
             </View>
             <TouchableOpacity style={styles.sendBtn}>
-                <Text style={{fontSize: 20}} onPress={() => send()}>Send</Text>
+                <Text style={{fontSize: 20}} onPress={() => send()}>Wyślij</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.sendBtn}>
+                <Text style={{fontSize: 20}} onPress={() => props.navigation.navigate('Home page')}>Wróć do menu</Text>
+            </TouchableOpacity>
+
         </View>
     )
 }
