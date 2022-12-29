@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ActivityIndicator, Alert, BackHandler} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import Finish from './src/Finish';
+import _ from 'lodash'
 
 const Drawer = createDrawerNavigator();
 
@@ -28,7 +29,7 @@ const App = () => {
 
     const [quizList, setQuizList] = useState([]);
     const [isLoading, setLoading] = useState(true);
-
+    const [isShuffle, setIsShuffle] = useState(false);
 
     const regulamin = 'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
         'RegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulaminRegulamin' +
@@ -100,7 +101,7 @@ const App = () => {
         try {
             const response = await fetch('https://tgryl.pl/quiz/tests');
             const json = await response.json();
-            setQuizList(json);
+            setQuizList(_.shuffle(json));
         } catch (error) {
             console.error(error);
         } finally {
