@@ -1,52 +1,100 @@
-import React, {Component} from 'react';
-import { View, Text, TouchableOpacity } from 'react-native'
-import { Table, Row, Rows } from 'react-native-table-component';
+import React, {useEffect, useState} from 'react';
+import {
+    View,
+    Text,
+    FlatList,
+    RefreshControl,
+    ActivityIndicator,
+} from 'react-native';
 
-export default class Result extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            tableHead: ['Nick', 'Points', 'Type', 'Date'],
-            tableData: [
-                ['asd', '2/20', 'test1', '1-1-2020'],
-                ['awe', '3/20', 'test1', '2-1-2020'],
-                ['qwe', '13/20', 'test1', '3-1-2020'],
-                ['zsd', '15/20', 'test1', '4-1-2020']
-            ]
+const Result = (props) => {
+    const [refreshing, setRefreshing] = useState(false);
+    const [isLoading, setLoading] = useState(true);
+    const [results, setResults] = useState([]);
+
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        try {
+            let response = await fetch(
+                'https://tgryl.pl/quiz/results?last=10',
+            );
+            let responseJson = await response.json();
+            setResults(responseJson);
+            setRefreshing(false);
+        } catch (error) {
+            console.error(error);
+        }
+
+    }, [refreshing]);
+
+    const getResults = async () => {
+        try {
+            const response = await fetch('https://tgryl.pl/quiz/results?last=10');
+            const json = await response.json();
+            setResults(json);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
     }
 
-    render() {
-        const state = this.state;
-        return (
-            <View style={{flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff'}}>
-                <Table borderStyle={{borderWidth: 2, borderColor: '#c8e1ff'}}>
-                    <Row data={state.tableHead} style={{height: 40, backgroundColor: '#f1f8ff'}} textStyle={{margin: 6}}/>
-                    <Rows data={state.tableData} textStyle={{margin: 6}}/>
-                </Table>
+    useEffect(() => {
+        let a = getResults();
+    }, []);
+
+    const item = ({ item }) => (
+        <View style={{ flexDirection: 'row' }}>
+            <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center'}}>{item.nick}</Text>
             </View>
-        )
-    }
+            <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>{item.score}/{item.total}</Text>
+            </View>
+            <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>{item.type}</Text>
+            </View>
+            <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>{item.createdOn}</Text>
+            </View>
+        </View>
+    )
+
+    return (
+        <View style={{margin: 15}}>
+            {refreshing ? <ActivityIndicator /> : null}
+            {isLoading ? <ActivityIndicator/> : (
+             <View>
+                <View style={{ flexDirection: 'row' }}>
+                    <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center'}}>Nick</Text>
+                    </View>
+                    <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>Point</Text>
+                    </View>
+                    <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>Type</Text>
+                    </View>
+                    <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold' , textAlign: 'center'}}>Date</Text>
+                    </View>
+                </View>
+                <FlatList
+                    style={{marginBottom: 15}}
+                    data={results}
+                    renderItem={item}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
+                    //keyExtractor={item => item.nick.toString()}
+                />
+             </View>
+            )}
+        </View>
+    )
 }
 
-
-// const Result = ({ navigation }) => {
-//     let tableHead: ['Nick', 'Points', 'Type', 'Date'];
-//     let tableData: [
-//         ['asd', '2/20', 'test1', '1-1-2020'],
-//         ['awe', '3/20', 'test1', '2-1-2020'],
-//         ['qwe', '13/20', 'test1', '3-1-2020'],
-//         ['zsd', '15/20', 'test1', '4-1-2020']];
-//
-//     return (
-//         <View style={styles.container}>
-//             <Table borderStyle={{borderWidth: 2, borderColor: '#c8e1ff'}}>
-//                 <Row data={tableHead} style={styles.head} textStyle={styles.text}/>
-//                 <Rows data={tableData} textStyle={styles.text}/>
-//             </Table>
-//         </View>
-//     )
-//
-// }
-//
-// export default Result
+export default Result
