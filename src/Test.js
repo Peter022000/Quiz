@@ -22,9 +22,9 @@ const Test = (props) => {
         setIsPlaying(true);
     }
 
-    const getQuiz = async () => {
+    const getQuiz = async (id) => {
         try {
-            let string = 'https://tgryl.pl/quiz/test/'+props.route.params.quizId;
+            let string = 'https://tgryl.pl/quiz/test/'+id;
             const response = await fetch(string);
             const json = await response.json();
             json.tasks = _.shuffle(json.tasks);
@@ -60,9 +60,21 @@ const Test = (props) => {
 
     useEffect(() => {
         return props.navigation.addListener("focus", () => {
-            let o = getQuiz();
+
+            if(props.route.params.quizId === -1)
+            {
+                let min = 0;
+                let max = props.route.params.quizList.length;
+                let random = Math.floor(Math.random() * (max - min) + min);
+                let o = getQuiz(props.route.params.quizList[random].id);
+            }
+            else
+            {
+                let o = getQuiz(props.route.params.quizId);
+            }
             clear();
         });
+
     }, [props.navigation]);
 
     useEffect(() => {
