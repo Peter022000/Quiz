@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {ProgressBar} from 'react-native-paper';
 import {CountdownCircleTimer} from 'react-native-countdown-circle-timer';
+import _ from 'lodash'
 
 const Test = (props) => {
 
@@ -26,6 +27,12 @@ const Test = (props) => {
             let string = 'https://tgryl.pl/quiz/test/'+props.route.params.quizId;
             const response = await fetch(string);
             const json = await response.json();
+            json.tasks = _.shuffle(json.tasks);
+
+            for (let i = 0; i < json.tasks.length; i++){
+                json.tasks[i].answers = _.shuffle(json.tasks[i].answers);
+            }
+
             setQuiz(json);
         } catch (error) {
             console.error(error);
