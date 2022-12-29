@@ -126,12 +126,21 @@ const App = () => {
         }))
     }
 
+    const randQuiz = () =>{
+        let min = 0;
+        let max = quizList.length-1;
+        let random = Math.floor(Math.random() * (max - min) + min);
+
+        return quizList[random].id;
+    }
+
     return (
       <NavigationContainer>
           {isLoading ? <ActivityIndicator/> : (
           <Drawer.Navigator initialRouteName="Home">
               <Drawer.Screen name="Home page" component={Home} initialParams={{quizList: quizList}}/>
               <Drawer.Screen name="Result" component={Result} />
+              <Drawer.Screen key={"rand_drawer_quiz"} name={"Losowy quiz"} component={Test}  initialParams={{quizId: randQuiz()}}/>
               {show_drawer_quiz()}
               <Drawer.Screen name="Finish" options={{drawerItemStyle: {display:'none'}, swipeEnabled: false, headerShown:false}} component={Finish} />
           </Drawer.Navigator>
