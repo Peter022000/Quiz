@@ -127,7 +127,6 @@ const Test = (props) => {
 
     const check = () =>{
         setAnswerIndex(-1);
-        console.log(typeof quiz)
         if(currentIndex === quiz.tasks.length-1){
             setIsPlaying(false);
             props.navigation.navigate('Finish',{
