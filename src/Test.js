@@ -1,8 +1,31 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+    ActivityIndicator,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    ToastAndroid,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import {ProgressBar} from 'react-native-paper';
 import {CountdownCircleTimer} from 'react-native-countdown-circle-timer';
-import _ from 'lodash'
+import _ from 'lodash';
+import SQLite from 'react-native-sqlite-storage';
+import NetInfo from '@react-native-community/netinfo';
+
+const db2 = SQLite.openDatabase(
+    {
+        name: 'quizDB',
+        location: 'default',
+    },
+    () => { },
+    error => {
+        console.log("ERROR: " + error);
+    }
+);
+
 
 const Test = (props) => {
 
@@ -13,6 +36,7 @@ const Test = (props) => {
     const [answerIndex, setAnswerIndex] = useState();
 
     const [quiz, setQuiz] = useState([]);
+    const [idBD, setIdBD] = useState();
     const [isLoading, setLoading] = useState(true);
 
     const clear = () => {
@@ -23,16 +47,16 @@ const Test = (props) => {
     }
 
     const getQuiz = async (id) => {
+
         try {
-            let string = 'https://tgryl.pl/quiz/test/'+id;
+            let string = 'https://tgryl.pl/quiz/test/' + id;
             const response = await fetch(string);
             const json = await response.json();
             json.tasks = _.shuffle(json.tasks);
 
-            for (let i = 0; i < json.tasks.length; i++){
+            for (let i = 0; i < json.tasks.length; i++) {
                 json.tasks[i].answers = _.shuffle(json.tasks[i].answers);
             }
-
             setQuiz(json);
         } catch (error) {
             console.error(error);
@@ -41,8 +65,69 @@ const Test = (props) => {
         }
     }
 
+    const DBHelper = {
+        getQuizDBTMP: (callback) => {
+            db2.transaction( (tx) => {
+                tx.executeSql(
+                    "SELECT quiz From Quiz where quiz_id = ?",
+                    [idBD],
+                    (tx, results) => {
+                        let len = results.rows.length;
+                        if(len > 0){
+                            let quiz = results.rows.item(0);
+                            let quiz2 = JSON.stringify(quiz).replaceAll('\\','');
+                            quiz2= quiz2.substring(9, quiz2.length-2);
+                            let quiz3 = JSON.parse(quiz2);
+
+                            quiz3.tasks = _.shuffle(quiz3.tasks);
+
+                            for (let i = 0; i < quiz3.tasks.length; i++) {
+                                quiz3.tasks[i].answers = _.shuffle(quiz3.tasks[i].answers);
+                            }
+                            callback(quiz3);
+                        }
+                    }
+                );
+            });
+        },
+    }
+
+    const getQuizBD = () => {
+        try {
+            DBHelper.getQuizDBTMP(value => {
+                setQuiz(value);
+                setLoading(false);
+            });
+        } catch (error) {
+            console.error(error);
+        } finally {
+
+        }
+    }
+
+    useEffect(() => {
+        getQuizBD();
+    }, [idBD]);
+
+    const getQuizStart = (id) => {
+        NetInfo.fetch().then(state => {
+            console.log("Connection type", state.type);
+            console.log("Is connected?", state.isConnected);
+            if (state.isConnected) {
+                ToastAndroid.show('Internet is on!', ToastAndroid.SHORT);
+
+                let o = getQuiz(id);
+            } else {
+                ToastAndroid.show('Internet is off!', ToastAndroid.SHORT);
+
+                setIdBD(id)
+            }
+        });
+    }
+
     const check = () =>{
         setAnswerIndex(-1);
+        console.log(typeof quiz)
         if(currentIndex === quiz.tasks.length-1){
             setIsPlaying(false);
             props.navigation.navigate('Finish',{
@@ -66,11 +151,11 @@ const Test = (props) => {
                 let min = 0;
                 let max = props.route.params.quizList.length;
                 let random = Math.floor(Math.random() * (max - min) + min);
-                let o = getQuiz(props.route.params.quizList[random].id);
+                getQuizStart(props.route.params.quizList[random].id);
             }
             else
             {
-                let o = getQuiz(props.route.params.quizId);
+                getQuizStart(props.route.params.quizId);
             }
             clear();
         });
@@ -145,14 +230,14 @@ const Test = (props) => {
                         {showAnswers()}
                     </ScrollView>
                 </View>
-                )}
+            )}
         </View>
     )
 }
 
 const styles = StyleSheet.create({
     container:{
-     flex:1
+        flex:1
     },
     rows:{
         flexDirection: 'row' ,
@@ -205,6 +290,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#5300B0',
         elevation: 20,
     },
-   });
+});
 
 export default Test

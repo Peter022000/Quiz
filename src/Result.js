@@ -4,13 +4,15 @@ import {
     Text,
     FlatList,
     RefreshControl,
-    ActivityIndicator,
+    ActivityIndicator, ToastAndroid,
 } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 
 const Result = (props) => {
     const [refreshing, setRefreshing] = useState(false);
     const [isLoading, setLoading] = useState(true);
-    const [results, setResults] = useState([]);
+    const [results, setResults] = useState({
+    });
 
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);
@@ -29,9 +31,18 @@ const Result = (props) => {
 
     const getResults = async () => {
         try {
-            const response = await fetch('https://tgryl.pl/quiz/results?last=10');
-            const json = await response.json();
-            setResults(json);
+            NetInfo.fetch().then(async state => {
+                if (state.isConnected) {
+                    ToastAndroid.show('Internet is on!', ToastAndroid.SHORT);
+                    const response = await fetch('https://tgryl.pl/quiz/results?last=10');
+                    const json = await response.json();
+                    setResults(json);
+                }
+                else {
+                    ToastAndroid.show('Internet is off!', ToastAndroid.SHORT);
+                    setResults([])
+                }
+            });
         } catch (error) {
             console.error(error);
         } finally {
@@ -40,8 +51,11 @@ const Result = (props) => {
     }
 
     useEffect(() => {
-        let a = getResults();
-    }, []);
+        return props.navigation.addListener("focus", () => {
+            let a = getResults();
+        });
+
+    }, [props.navigation]);
 
     const item = ({ item }) => (
         <View style={{ flexDirection: 'row' }}>
@@ -65,7 +79,7 @@ const Result = (props) => {
             {refreshing ? <ActivityIndicator /> : null}
             {isLoading ? <ActivityIndicator/> : (
              <View>
-                <View style={{ flexDirection: 'row' }}>
+                <View style={{ flexDirection: 'row' }} >
                     <View style={{display: 'flex', flex: 1, borderWidth: 1}}>
                         <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center'}}>Nick</Text>
                     </View>

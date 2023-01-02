@@ -3,11 +3,12 @@ import {
     Alert,
     StyleSheet,
     Text,
-    TextInput,
+    TextInput, ToastAndroid,
     TouchableOpacity,
     View,
 } from 'react-native';
 import React, {useState} from 'react';
+import NetInfo from '@react-native-community/netinfo';
 
 const Finish = (props) => {
 
@@ -15,46 +16,56 @@ const Finish = (props) => {
     const [refreshing, setRefreshing] = useState(false);
 
     const send = async () => {
-        if(name !== '')
-        {
-            try {
-                setRefreshing(true);
-                await fetch('http://tgryl.pl/quiz/result', {
-                    method: 'POST',
-                    headers: {
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        nick: name,
-                        score: props.route.params.score,
-                        total: props.route.params.total,
-                        type: props.route.params.nameQuiz
-                    }),
-                });
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setRefreshing(false);
-                Alert.alert(
-                    'wysłano',
-                    '',
-                    [
-                        {text: 'Wyjdź do menu', onPress: async () => {
-                                props.navigation.navigate('Home page')
-                            }},
-                    ],
-                    { cancelable: false }
-                );
+        NetInfo.fetch().then(async state => {
+            console.log("Connection type", state.type);
+            console.log("Is connected?", state.isConnected);
+            if (state.isConnected) {
+                if (name !== '') {
+                    try {
+                        setRefreshing(true);
+                        await fetch('http://tgryl.pl/quiz/result', {
+                            method: 'POST',
+                            headers: {
+                                Accept: 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                nick: name,
+                                score: props.route.params.score,
+                                total: props.route.params.total,
+                                type: props.route.params.nameQuiz
+                            }),
+                        });
+                    } catch (error) {
+                        console.error(error);
+                    } finally {
+                        setRefreshing(false);
+                        Alert.alert(
+                            'wysłano',
+                            '',
+                            [
+                                {
+                                    text: 'Wyjdź do menu', onPress: async () => {
+                                        props.navigation.navigate('Home page')
+                                    }
+                                },
+                            ],
+                            {cancelable: false}
+                        );
+                    }
+                }
+            } else {
+                props.navigation.navigate('Home page')
             }
-        }
+        });
+
     }
 
     return (
         <View style={styles.container}>
             {refreshing ? <ActivityIndicator /> : null}
             <Text style={{margin: 15, justifyContent: 'center', fontSize: 30}}>{props.route.params.nameQuiz}</Text>
-            <Text style={{margin: 15, fontSize: 20}}>Wynik: {props.route.params.score}</Text>
+            <Text style={{margin: 15, fontSize: 20}}>Wynik: {props.route.params.score} z {props.route.params.total}</Text>
             <Text style={{margin: 15, fontSize: 20}}>Twoje imie:</Text>
             <View style={styles.inputView}>
                 <TextInput style={styles.TextInput}
